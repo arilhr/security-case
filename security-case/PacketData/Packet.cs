@@ -1,0 +1,16 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace PacketData
+{
+    public class Constant
+    {
+        public static byte[] dataBuffer = new byte[4096];
+    }
+
+    public enum Packet
+    {
+        SEND_KEY = 1,
+        SEND_MESSAGE
+    }
+}
