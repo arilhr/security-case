@@ -15,7 +15,14 @@ namespace PacketData
         private RSACryptoServiceProvider csp = new RSACryptoServiceProvider();
         public RSAParameters publicKey;
         public RSAParameters privateKey;
+
+        // if data to encrypt is larger than 100 byte, encrypt data per this size
         private int sizePerEncrypt = 100;
+
+        public void GetKeySize()
+        {
+            Console.WriteLine($"{csp.KeySize}");
+        }
 
         public void GenerateKey()
         {
@@ -45,10 +52,9 @@ namespace PacketData
         {
             if (publicKey.Equals(null))
             {
-                Console.WriteLine($"Private Key is null..");
+                Console.WriteLine($"Public Key is null..");
                 return null;
             }
-
             csp = new RSACryptoServiceProvider();
             csp.ImportParameters(publicKey);
             var data = Encoding.Unicode.GetBytes(_plainText);
@@ -82,8 +88,9 @@ namespace PacketData
                 Console.WriteLine($"Private Key is null..");
                 return null;
             }
-
+            csp = new RSACryptoServiceProvider();
             csp.ImportParameters(privateKey);
+
             int iteration = _cypherText.Length / 172;
             string resultData = string.Empty;
             for (int i = 0; i < iteration; i++)
@@ -94,7 +101,7 @@ namespace PacketData
                 resultData += Encoding.Unicode.GetString(plainText);
             }
 
-            return resultData;
+            return resultData.TrimEnd(new[] { '\0' });
         }
     }
 }

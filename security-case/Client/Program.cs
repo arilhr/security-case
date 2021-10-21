@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PacketData;
+using System;
 
 namespace Client
 {

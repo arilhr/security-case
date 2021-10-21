@@ -83,6 +83,7 @@ namespace Server
         private NetworkStream stream;
         private Encryption clientEncryption = new Encryption();
         private Encryption serverEncryption = new Encryption();
+        private AesEncryptor symmetricEncryptor = new AesEncryptor();
 
         public Client(TcpClient _client, Encryption serverEncryption)
         {
@@ -146,6 +147,7 @@ namespace Server
                     Console.WriteLine($"Received Client Public Key..");
                     // convert string to client public key
                     clientEncryption.publicKey = serverEncryption.ConvertStringToKey(decrypted);
+                    SendSymmetricKey();
                     break;
                 case (int)Packet.SEND_MESSAGE:
                     string message = Encoding.ASCII.GetString(messageData, 0, messageData.Length);
@@ -165,6 +167,14 @@ namespace Server
 
             // send to server
             stream.Write(dataToSend.ToArray(), 0, dataToSend.Count);
+        }
+
+        public void SendSymmetricKey()
+        {
+            symmetricEncryptor.GenerateNewKey();
+            string key = Encoding.Unicode.GetString(symmetricEncryptor.aes.Key);
+            string encryptedKey = clientEncryption.Encrypt(key);
+            SendData(Packet.SEND_SYMMETRIC_KEY, encryptedKey);
         }
     }
 }

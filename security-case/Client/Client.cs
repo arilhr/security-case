@@ -12,16 +12,18 @@ namespace Client
     {
         private TcpClient socket;
         private NetworkStream stream;
+
+        // assymetric key
         private Encryption clientEncryption = new Encryption();
 
         string serverPublicKeyPath = Directory.GetCurrentDirectory() + "\\server-public-key.txt";
         private Encryption serverEncryption = new Encryption();
 
+        // symmetric key
+        private AesEncryptor symmetricEncryptor = new AesEncryptor();
+
         public Client()
         {
-            // generate client key
-            clientEncryption.GenerateKey();
-
             // load server public key
             LoadServerPublicKey();
         }
@@ -41,15 +43,17 @@ namespace Client
             {
                 // try connect to server
                 socket = new TcpClient(ip, port);
+
                 stream = socket.GetStream();
                 Console.WriteLine("Connected to server...");
 
                 stream.BeginRead(Constant.dataBuffer, 0, Constant.dataBuffer.Length, ReceiveData, null);
+                
+                // generate client key
+                clientEncryption.GenerateKey();
 
                 // send client public key to server
-                string clientPublicKeyOnString = clientEncryption.ConvertKeyToString(clientEncryption.publicKey);
-                string encryptedKey = serverEncryption.Encrypt(clientPublicKeyOnString);
-                SendData(Packet.SEND_KEY, encryptedKey);
+                SendPublicKey();
 
                 Console.WriteLine($"Sending Client Public Key to Server...");
             }
@@ -91,13 +95,21 @@ namespace Client
             int packetType = BitConverter.ToInt32(buffer, readPos);
             readPos += 4;
 
+            // get message
+            byte[] messageData = new byte[buffer.Length - 4];
+            Array.Copy(buffer, readPos, messageData, 0, buffer.Length - readPos);
+
             switch (packetType)
             {
-                case (int)Packet.SEND_KEY:
-                    string keyString = BitConverter.ToString(buffer, readPos);
+                case (int)Packet.SEND_SYMMETRIC_KEY:
+                    // read message (encrypted client public key)
+                    string keyString = Encoding.ASCII.GetString(messageData);
+                    // decrypt with private server key
+                    string decrypted = clientEncryption.Decrypt(keyString);
+                    symmetricEncryptor.SetKey(Encoding.Unicode.GetBytes(decrypted));
                     break;
                 case (int)Packet.SEND_MESSAGE:
-                    string message = BitConverter.ToString(buffer, readPos);
+                    string message = Encoding.ASCII.GetString(messageData);
                     Console.WriteLine($"Client:\n{message}");
                     break;
                 default:
@@ -125,6 +137,14 @@ namespace Client
 
             // send to server
             stream.Write(dataToSend.ToArray(), 0, dataToSend.Count);
+        }
+
+        private void SendPublicKey()
+        {
+            string clientPublicKeyOnString = clientEncryption.ConvertKeyToString(clientEncryption.publicKey);
+            string encryptedKey = serverEncryption.Encrypt(clientPublicKeyOnString);
+            Console.WriteLine($"\nClient Public Key:\n{clientPublicKeyOnString}");
+            SendData(Packet.SEND_KEY, encryptedKey);
         }
     }
 }
