@@ -55,6 +55,7 @@ namespace PacketData
                 Console.WriteLine($"Public Key is null..");
                 return null;
             }
+
             csp = new RSACryptoServiceProvider();
             csp.ImportParameters(publicKey);
             var data = Encoding.Unicode.GetBytes(_plainText);
@@ -88,6 +89,7 @@ namespace PacketData
                 Console.WriteLine($"Private Key is null..");
                 return null;
             }
+
             csp = new RSACryptoServiceProvider();
             csp.ImportParameters(privateKey);
 

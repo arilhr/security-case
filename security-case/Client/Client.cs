@@ -22,8 +22,13 @@ namespace Client
         // symmetric key
         private AesEncryptor symmetricEncryptor = new AesEncryptor();
 
+        // when client ready to send message
+        public bool isReadyToSendMessage = false;
+
         public Client()
         {
+            isReadyToSendMessage = false;
+
             // load server public key
             LoadServerPublicKey();
         }
@@ -106,18 +111,30 @@ namespace Client
                     string keyString = Encoding.ASCII.GetString(messageData);
                     // decrypt with private server key
                     string decrypted = clientEncryption.Decrypt(keyString);
-                    symmetricEncryptor.SetKey(Encoding.Unicode.GetBytes(decrypted));
+                    Console.WriteLine($"{decrypted}");
+                    symmetricEncryptor.SetKey(Convert.FromBase64String(decrypted));
+                    isReadyToSendMessage = true;
+                    SendMessage("Hello from client!");
                     break;
                 case (int)Packet.SEND_MESSAGE:
-                    string message = Encoding.ASCII.GetString(messageData);
-                    Console.WriteLine($"Client:\n{message}");
+                    string message = Encoding.ASCII.GetString(messageData, 0, messageData.Length);
+                    string decryptedMsg = symmetricEncryptor.Decrypt(message);
+                    Console.WriteLine($"Message from server: {decryptedMsg}");
                     break;
                 default:
                     break;
             }
         }
 
-        public void SendData(Packet packet, string data)
+        public void SendMessage(string msg)
+        {
+            if (!isReadyToSendMessage) return;
+
+            string encryptedWithSymKey = symmetricEncryptor.Encrypt(msg);
+            SendData(Packet.SEND_MESSAGE, encryptedWithSymKey);
+        }
+
+        private void SendData(Packet packet, string data)
         {
             // convert data to byte
             List<byte> dataToSend = new List<byte>();
@@ -128,22 +145,11 @@ namespace Client
             stream.Write(dataToSend.ToArray(), 0, dataToSend.Count);
         }
 
-        public void SendData(Packet packet, byte[] data)
-        {
-            // convert data to byte
-            List<byte> dataToSend = new List<byte>();
-            dataToSend.AddRange(BitConverter.GetBytes((int)packet));
-            dataToSend.AddRange(data);
-
-            // send to server
-            stream.Write(dataToSend.ToArray(), 0, dataToSend.Count);
-        }
-
         private void SendPublicKey()
         {
             string clientPublicKeyOnString = clientEncryption.ConvertKeyToString(clientEncryption.publicKey);
             string encryptedKey = serverEncryption.Encrypt(clientPublicKeyOnString);
-            Console.WriteLine($"\nClient Public Key:\n{clientPublicKeyOnString}");
+            Console.WriteLine($"\nSend Client Public Key...");
             SendData(Packet.SEND_KEY, encryptedKey);
         }
     }

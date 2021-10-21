@@ -14,19 +14,6 @@ namespace Server
 
             server.Start();
 
-            //Encryption enc = new Encryption();
-            //AesEncryptor aes = new AesEncryptor();
-
-            //enc.GenerateKey();
-            //aes.GenerateNewKey();
-            //string key = Convert.ToBase64String(aes.aes.Key);
-            //string IV = Convert.ToBase64String(aes.aes.IV);
-
-            //string encrypted = enc.Encrypt(key);
-            //Console.WriteLine($"Encrypted: {encrypted}||");
-            //string decrypted = enc.Decrypt(encrypted);
-            //Console.WriteLine($"Decrypted: {decrypted}||");
-
             Console.ReadKey();
         }
     }

@@ -12,7 +12,9 @@ namespace PacketData
 
         public AesEncryptor ()
         {
+            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             aes = Aes.Create();
+            aes.IV = iv;
         }
 
         public void GenerateNewKey()
@@ -27,10 +29,8 @@ namespace PacketData
             Console.WriteLine($"Updated Key: {Convert.ToBase64String(aes.Key)}");
         }
 
-        public string Encrypt(string key, string plainText)
+        public string Encrypt(string plainText)
         {
-            aes.Key = Encoding.UTF8.GetBytes(key);
-            aes.IV = new byte[16];
             byte[] encrypted;
 
             ICryptoTransform enc = aes.CreateEncryptor();

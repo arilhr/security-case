@@ -150,8 +150,17 @@ namespace Server
                     SendSymmetricKey();
                     break;
                 case (int)Packet.SEND_MESSAGE:
-                    string message = Encoding.ASCII.GetString(messageData, 0, messageData.Length);
-                    Console.WriteLine($"Client: {message}");
+                    try
+                    {
+                        string message = Encoding.ASCII.GetString(messageData, 0, messageData.Length);
+                        string decryptedMsg = symmetricEncryptor.Decrypt(message);
+                        Console.WriteLine($"Message from Client: {decryptedMsg}");
+                        SendMessage("Hello from server!");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"Error: {e.InnerException}");
+                    }
                     break;
                 default:
                     break;
@@ -169,10 +178,27 @@ namespace Server
             stream.Write(dataToSend.ToArray(), 0, dataToSend.Count);
         }
 
+        public void SendData(Packet packet, byte[] data)
+        {
+            // convert data to byte
+            List<byte> dataToSend = new List<byte>();
+            dataToSend.AddRange(BitConverter.GetBytes((int)packet));
+            dataToSend.AddRange(data);
+
+            // send to server
+            stream.Write(dataToSend.ToArray(), 0, dataToSend.Count);
+        }
+
+        public void SendMessage(string msg)
+        {
+            string encryptedWithSymKey = symmetricEncryptor.Encrypt(msg);
+            SendData(Packet.SEND_MESSAGE, encryptedWithSymKey);
+        }
+
         public void SendSymmetricKey()
         {
             symmetricEncryptor.GenerateNewKey();
-            string key = Encoding.Unicode.GetString(symmetricEncryptor.aes.Key);
+            string key = Convert.ToBase64String(symmetricEncryptor.aes.Key);
             string encryptedKey = clientEncryption.Encrypt(key);
             SendData(Packet.SEND_SYMMETRIC_KEY, encryptedKey);
         }
