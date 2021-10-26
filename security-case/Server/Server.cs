@@ -19,7 +19,7 @@ namespace Server
         private int port;
         private List<Client> clientOnServer = new List<Client>();
 
-        private Encryption serverEncryption = new Encryption();
+        private RsaEncryption serverEncryption = new RsaEncryption();
         private string serverPrivateKeyPath = Directory.GetCurrentDirectory() + "\\server-private-key.txt";
         private string serverPublicKeyPath = Directory.GetCurrentDirectory() + "\\server-public-key.txt";
 
@@ -81,11 +81,11 @@ namespace Server
     {
         private TcpClient socket;
         private NetworkStream stream;
-        private Encryption clientEncryption = new Encryption();
-        private Encryption serverEncryption = new Encryption();
+        private RsaEncryption clientEncryption = new RsaEncryption();
+        private RsaEncryption serverEncryption = new RsaEncryption();
         private AesEncryptor symmetricEncryptor = new AesEncryptor();
 
-        public Client(TcpClient _client, Encryption serverEncryption)
+        public Client(TcpClient _client, RsaEncryption serverEncryption)
         {
             this.serverEncryption = serverEncryption;
 

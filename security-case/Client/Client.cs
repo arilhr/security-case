@@ -14,10 +14,10 @@ namespace Client
         private NetworkStream stream;
 
         // assymetric key
-        private Encryption clientEncryption = new Encryption();
+        private RsaEncryption clientEncryption = new RsaEncryption();
 
         string serverPublicKeyPath = Directory.GetCurrentDirectory() + "\\server-public-key.txt";
-        private Encryption serverEncryption = new Encryption();
+        private RsaEncryption serverEncryption = new RsaEncryption();
 
         // symmetric key
         private AesEncryptor symmetricEncryptor = new AesEncryptor();
@@ -114,7 +114,6 @@ namespace Client
                     Console.WriteLine($"{decrypted}");
                     symmetricEncryptor.SetKey(Convert.FromBase64String(decrypted));
                     isReadyToSendMessage = true;
-                    SendMessage("Hello from client!");
                     break;
                 case (int)Packet.SEND_MESSAGE:
                     string message = Encoding.ASCII.GetString(messageData, 0, messageData.Length);

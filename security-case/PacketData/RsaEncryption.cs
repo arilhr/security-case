@@ -10,7 +10,7 @@ using System.Xml.Serialization;
 
 namespace PacketData
 {
-    public class Encryption
+    public class RsaEncryption
     {
         private RSACryptoServiceProvider csp = new RSACryptoServiceProvider();
         public RSAParameters publicKey;
@@ -18,11 +18,6 @@ namespace PacketData
 
         // if data to encrypt is larger than 100 byte, encrypt data per this size
         private int sizePerEncrypt = 100;
-
-        public void GetKeySize()
-        {
-            Console.WriteLine($"{csp.KeySize}");
-        }
 
         public void GenerateKey()
         {
