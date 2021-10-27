@@ -45,7 +45,7 @@ namespace PacketData
 
         public string Encrypt(string _plainText)
         {
-            if (publicKey.Equals(null))
+            if (publicKey.Modulus == null)
             {
                 Console.WriteLine($"Public Key is null..");
                 return null;
@@ -79,7 +79,7 @@ namespace PacketData
 
         public string Decrypt(string _cypherText)
         {
-            if (privateKey.Equals(null))
+            if (privateKey.Modulus == null)
             {
                 Console.WriteLine($"Private Key is null..");
                 return null;

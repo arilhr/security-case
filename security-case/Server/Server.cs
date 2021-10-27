@@ -155,7 +155,6 @@ namespace Server
                         string message = Encoding.ASCII.GetString(messageData, 0, messageData.Length);
                         string decryptedMsg = symmetricEncryptor.Decrypt(message);
                         Console.WriteLine($"Message from Client: {decryptedMsg}");
-                        SendMessage("Hello from server!");
                     }
                     catch (Exception e)
                     {

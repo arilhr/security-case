@@ -13,6 +13,7 @@ namespace Client
 
             client.Connect(ip, port);
 
+
             Console.ReadKey();
         }
     }
